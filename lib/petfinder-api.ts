@@ -250,6 +250,8 @@ export async function fetchPetsWithFilters(
     goodWithKids?: boolean | null
     goodWithDogs?: boolean | null
     goodWithCats?: boolean | null
+    location?: string | null
+    distance?: number | null
   } = {},
 ): Promise<PetfinderResponse> {
   const token = await getAccessToken()
@@ -266,6 +268,13 @@ export async function fetchPetsWithFilters(
   if (filters.size) params.append("size", filters.size)
   if (filters.gender) params.append("gender", filters.gender)
 
+  if (filters.location && isValidLocation(filters.location)) {
+    params.append("location", filters.location)
+    if (filters.distance) params.append("distance", filters.distance.toString())
+  }
+
+  console.log("[v0] API request params:", params.toString())
+
   const response = await fetch(`${PETFINDER_BASE_URL}/animals?${params}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -274,7 +283,9 @@ export async function fetchPetsWithFilters(
   })
 
   if (!response.ok) {
-    throw new Error("Failed to fetch pets")
+    const errorText = await response.text()
+    console.error("[v0] API Error:", response.status, errorText)
+    throw new Error(`Failed to fetch pets: ${response.status} ${response.statusText}`)
   }
 
   const data: PetfinderResponse = await response.json()
@@ -298,8 +309,24 @@ export async function fetchPetsWithFilters(
     filteredAnimals = filteredAnimals.filter((pet) => pet.environment.cats === filters.goodWithCats)
   }
 
+  console.log("[v0] Filtered animals count:", filteredAnimals.length)
+
   return {
     ...data,
     animals: filteredAnimals,
   }
+}
+
+function isValidLocation(location: string): boolean {
+  if (!location || location.trim().length === 0) return false
+
+  // Check for 5-digit zip code
+  const zipRegex = /^\d{5}$/
+  if (zipRegex.test(location.trim())) return true
+
+  // Check for city, state format (basic validation)
+  const cityStateRegex = /^[a-zA-Z\s]+,\s*[a-zA-Z\s]+$/
+  if (cityStateRegex.test(location.trim())) return true
+
+  return false
 }

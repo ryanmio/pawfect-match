@@ -1,13 +1,15 @@
 "use client"
 
-import { useState } from "react"
-import { Filter, X, Check } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Filter, X, Check, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export interface FilterOptions {
   type: string | null
@@ -18,6 +20,8 @@ export interface FilterOptions {
   goodWithKids: boolean | null
   goodWithDogs: boolean | null
   goodWithCats: boolean | null
+  location: string | null
+  distance: number | null
 }
 
 interface FilterPanelProps {
@@ -32,7 +36,9 @@ const ANIMAL_TYPES = [
   { value: "rabbit", label: "Rabbits", emoji: "🐰" },
   { value: "bird", label: "Birds", emoji: "🐦" },
   { value: "horse", label: "Horses", emoji: "🐴" },
-  { value: "pig", label: "Pigs", emoji: "🐷" },
+  { value: "small-furry", label: "Small & Furry", emoji: "🐹" },
+  { value: "scales-fins-other", label: "Scales, Fins & Other", emoji: "🐠" },
+  { value: "barnyard", label: "Barnyard", emoji: "🐷" },
 ]
 
 const AGE_OPTIONS = [
@@ -54,8 +60,28 @@ const GENDER_OPTIONS = [
   { value: "female", label: "Female" },
 ]
 
+const DISTANCE_OPTIONS = [
+  { value: 25, label: "25 miles" },
+  { value: 50, label: "50 miles" },
+  { value: 100, label: "100 miles" },
+  { value: 250, label: "250 miles" },
+  { value: 500, label: "500 miles" },
+]
+
 export function FilterPanel({ filters, onFiltersChange, onApplyFilters }: FilterPanelProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [localLocation, setLocalLocation] = useState(filters.location || "")
+
+  const debouncedLocationUpdate = useCallback(
+    debounce((value: string) => {
+      updateFilter("location", value || null)
+    }, 500),
+    [],
+  )
+
+  useEffect(() => {
+    setLocalLocation(filters.location || "")
+  }, [filters.location])
 
   const updateFilter = <K extends keyof FilterOptions>(key: K, value: FilterOptions[K]) => {
     onFiltersChange({ ...filters, [key]: value })
@@ -71,6 +97,8 @@ export function FilterPanel({ filters, onFiltersChange, onApplyFilters }: Filter
       goodWithKids: null,
       goodWithDogs: null,
       goodWithCats: null,
+      location: null,
+      distance: null,
     })
   }
 
@@ -84,6 +112,8 @@ export function FilterPanel({ filters, onFiltersChange, onApplyFilters }: Filter
     if (filters.goodWithKids !== null) count++
     if (filters.goodWithDogs !== null) count++
     if (filters.goodWithCats !== null) count++
+    if (filters.location) count++
+    if (filters.distance) count++
     return count
   }
 
@@ -93,6 +123,11 @@ export function FilterPanel({ filters, onFiltersChange, onApplyFilters }: Filter
   }
 
   const activeFilterCount = getActiveFilterCount()
+
+  const handleLocationChange = (value: string) => {
+    setLocalLocation(value)
+    debouncedLocationUpdate(value)
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -124,6 +159,55 @@ export function FilterPanel({ filters, onFiltersChange, onApplyFilters }: Filter
         </SheetHeader>
 
         <div className="space-y-6 mt-6">
+          {/* Location */}
+          <div>
+            <Label className="text-base font-semibold mb-3 block flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              Location
+            </Label>
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="location" className="text-sm text-muted-foreground">
+                  Zip Code or City, State
+                </Label>
+                <Input
+                  id="location"
+                  placeholder="e.g. 90210 or Los Angeles, CA"
+                  value={localLocation}
+                  onChange={(e) => handleLocationChange(e.target.value)}
+                  className="mt-1"
+                />
+                {localLocation && !isValidLocation(localLocation) && (
+                  <p className="text-xs text-muted-foreground mt-1">Enter a 5-digit zip code or "City, State" format</p>
+                )}
+              </div>
+              {filters.location && isValidLocation(filters.location) && (
+                <div>
+                  <Label htmlFor="distance" className="text-sm text-muted-foreground">
+                    Search Radius
+                  </Label>
+                  <Select
+                    value={filters.distance?.toString() || ""}
+                    onValueChange={(value) => updateFilter("distance", value ? Number.parseInt(value) : null)}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select distance" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DISTANCE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value.toString()}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Animal Type */}
           <div>
             <Label className="text-base font-semibold mb-3 block">Animal Type</Label>
@@ -316,4 +400,24 @@ export function FilterPanel({ filters, onFiltersChange, onApplyFilters }: Filter
       </SheetContent>
     </Sheet>
   )
+}
+
+function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T {
+  let timeout: NodeJS.Timeout
+  return ((...args: any[]) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => func(...args), wait)
+  }) as T
+}
+
+function isValidLocation(location: string): boolean {
+  if (!location || location.trim().length === 0) return false
+
+  const zipRegex = /^\d{5}$/
+  if (zipRegex.test(location.trim())) return true
+
+  const cityStateRegex = /^[a-zA-Z\s]+,\s*[a-zA-Z\s]+$/
+  if (cityStateRegex.test(location.trim())) return true
+
+  return false
 }

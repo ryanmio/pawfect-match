@@ -29,6 +29,8 @@ export function PawfectMatch() {
     goodWithKids: null,
     goodWithDogs: null,
     goodWithCats: null,
+    location: null,
+    distance: null,
   })
 
   useEffect(() => {

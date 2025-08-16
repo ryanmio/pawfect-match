@@ -1,30 +1,22 @@
-# Petfinder API Access
+# 🐾 Pawfect Match
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+**Tinder for Pet Adoption** - A fun project in progress!
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/ryanmios-projects/v0-petfinder-api-access-bu)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/ysxJEsbWEXh)
+This is a work-in-progress web app that lets you swipe through pets to adopt, just like Tinder but for finding pets to adopt.
 
-## Overview
+## 🚧 WIP Status
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+Still building this out! More features coming soon.
 
-## Deployment
+## 🚀 Quick Start
 
-Your project is live at:
+```bash
+pnpm install
+pnpm dev
+```
 
-**[https://vercel.com/ryanmios-projects/v0-petfinder-api-access-bu](https://vercel.com/ryanmios-projects/v0-petfinder-api-access-bu)**
+Visit `http://localhost:3000` to see it in action.
 
-## Build your app
+---
 
-Continue building your app on:
-
-**[https://v0.app/chat/projects/ysxJEsbWEXh](https://v0.app/chat/projects/ysxJEsbWEXh)**
-
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+*Built with Next.js, TypeScript, and Tailwind CSS*

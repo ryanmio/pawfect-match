@@ -1,3 +1,5 @@
+import "server-only"
+
 interface PetfinderToken {
   access_token: string
   expires_in: number
@@ -121,16 +123,18 @@ const PETFINDER_API_KEY = process.env.NEXT_PUBLIC_PETFINDER_API_KEY
 const PETFINDER_SECRET = process.env.PETFINDER_SECRET
 const PETFINDER_BASE_URL = "https://api.petfinder.com/v2"
 
-// Validate environment variables
-if (!PETFINDER_API_KEY || !PETFINDER_SECRET) {
-  throw new Error(
-    "Missing Petfinder API credentials. Please set NEXT_PUBLIC_PETFINDER_API_KEY and PETFINDER_SECRET in your .env.local file."
-  )
+function ensureCredentials() {
+  if (!PETFINDER_API_KEY || !PETFINDER_SECRET) {
+    throw new Error(
+      "Missing Petfinder API credentials. Please set NEXT_PUBLIC_PETFINDER_API_KEY and PETFINDER_SECRET in your .env.local file."
+    )
+  }
 }
 
 let cachedToken: { token: string; expiresAt: number } | null = null
 
 async function getAccessToken(): Promise<string> {
+  ensureCredentials()
   // Check if we have a valid cached token
   if (cachedToken && Date.now() < cachedToken.expiresAt) {
     return cachedToken.token
@@ -143,8 +147,8 @@ async function getAccessToken(): Promise<string> {
     },
     body: new URLSearchParams({
       grant_type: "client_credentials",
-      client_id: PETFINDER_API_KEY,
-      client_secret: PETFINDER_SECRET,
+      client_id: PETFINDER_API_KEY!,
+      client_secret: PETFINDER_SECRET!,
     }),
   })
 

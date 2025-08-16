@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Heart, X, Settings, User, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { fetchPetsWithFilters, type Pet } from "@/lib/petfinder-api"
+import type { Pet } from "@/lib/types"
 import { SwipeablePetCard } from "@/components/swipeable-pet-card"
 import { FavoritesList } from "@/components/favorites-list"
 import { PetDetailsModal } from "@/components/pet-details-modal"
@@ -50,7 +50,27 @@ export function PawfectMatch() {
       setError(null)
       const currentPage = resetPets ? 1 : page
       console.log("[v0] Loading pets with filters:", filters) // Debug log
-      const response = await fetchPetsWithFilters(currentPage, 20, filters)
+
+      const params = new URLSearchParams()
+      params.set("page", String(currentPage))
+      params.set("limit", "20")
+      if (filters.type) params.set("type", filters.type)
+      if (filters.age) params.set("age", filters.age)
+      if (filters.size) params.set("size", filters.size)
+      if (filters.gender) params.set("gender", filters.gender)
+      if (filters.location) params.set("location", filters.location)
+      if (filters.distance !== null && filters.distance !== undefined) {
+        params.set("distance", String(filters.distance))
+      }
+      if (filters.hasPhotos) params.set("hasPhotos", "true")
+      if (filters.goodWithKids !== null) params.set("goodWithKids", String(filters.goodWithKids))
+      if (filters.goodWithDogs !== null) params.set("goodWithDogs", String(filters.goodWithDogs))
+      if (filters.goodWithCats !== null) params.set("goodWithCats", String(filters.goodWithCats))
+
+      const res = await fetch(`/api/pets?${params.toString()}`)
+      if (!res.ok) throw new Error("Failed to load pets")
+      const response = await res.json()
+
       console.log("[v0] Received pets:", response.animals.length, "pets") // Debug log
       setPets((prev) => (resetPets || currentPage === 1 ? response.animals : [...prev, ...response.animals]))
 

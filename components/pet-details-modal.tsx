@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import type { Pet } from "@/lib/petfinder-api"
+import type { Pet } from "@/lib/types"
 
 interface PetDetailsModalProps {
   pet: Pet | null
@@ -262,7 +262,7 @@ export function PetDetailsModal({ pet, isOpen, onClose, onAddToFavorites, isFavo
             </div>
 
             {/* Environment */}
-            {(pet.environment.children !== null || pet.environment.dogs !== null || pet.environment.cats !== null) && (
+            {(pet.environment.children || pet.environment.dogs || pet.environment.cats) && (
               <div className="mb-6">
                 <h3 className="font-medium mb-3">Good With</h3>
                 <div className="flex flex-wrap gap-2">

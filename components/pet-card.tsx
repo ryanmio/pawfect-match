@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MapPin, Calendar, Palette, Info } from "lucide-react"
-import type { Pet } from "@/lib/petfinder-api"
+import type { Pet } from "@/lib/types"
 
 interface PetCardProps {
   pet: Pet

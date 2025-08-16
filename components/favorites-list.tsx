@@ -4,7 +4,7 @@ import { ArrowLeft, MapPin, Phone, Mail, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { Pet } from "@/lib/petfinder-api"
+import type { Pet } from "@/lib/types"
 
 interface FavoritesListProps {
   favorites: Pet[]

@@ -117,9 +117,16 @@ interface PetfinderResponse {
   }
 }
 
-const PETFINDER_API_KEY = "BNdz3RD8xUmKUMEDhDNd3m8xGJA0LpdIN0dAmAL1kXYEV0PJmF"
-const PETFINDER_SECRET = "Xa0lbh7Iq74ufczscNMtH9MnVUPclzERCKkNpvfX"
+const PETFINDER_API_KEY = process.env.NEXT_PUBLIC_PETFINDER_API_KEY
+const PETFINDER_SECRET = process.env.PETFINDER_SECRET
 const PETFINDER_BASE_URL = "https://api.petfinder.com/v2"
+
+// Validate environment variables
+if (!PETFINDER_API_KEY || !PETFINDER_SECRET) {
+  throw new Error(
+    "Missing Petfinder API credentials. Please set NEXT_PUBLIC_PETFINDER_API_KEY and PETFINDER_SECRET in your .env.local file."
+  )
+}
 
 let cachedToken: { token: string; expiresAt: number } | null = null
 
